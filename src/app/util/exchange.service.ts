@@ -7,6 +7,8 @@ import token_artifacts from '../../../build/contracts/FixedSupplyToken.json';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Subject } from 'rxjs/Subject';
 
+declare let window: any;
+
 @Injectable()
 export class ExchangeService {
 
@@ -19,7 +21,9 @@ export class ExchangeService {
 
   constructor(public web3service: Web3Service) {
     this.ExchangeContract = contract(exchange_artifacts);
+    this.ExchangeContract.setProvider(window.web3.currentProvider);
     this.TokenContract = contract(token_artifacts);
+    this.TokenContract.setProvider(window.web3.currentProvider);
 
     this.balanceTokenInExchange = new BehaviorSubject(0);
     this.refreshBalanceTokenInExchange();
@@ -40,7 +44,7 @@ export class ExchangeService {
     return this.ExchangeContract.deployed().then((instance) => {
       return instance.getEthBalanceInWei();
     }).then((value) => {
-      return this.web3service.web3.fromWei(value, 'ether');
+      return this.web3service.web3.utils.fromWei(value.toString(), 'ether');
     }).then((value) => {
       this.balanceEtherInExchange.next(value);
     });
